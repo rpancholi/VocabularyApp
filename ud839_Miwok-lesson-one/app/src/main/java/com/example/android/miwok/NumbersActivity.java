@@ -15,6 +15,8 @@
  */
 package com.example.android.miwok;
 
+import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -36,12 +38,14 @@ import static android.os.Build.VERSION_CODES.M;
 public class NumbersActivity extends AppCompatActivity {
 
     private MediaPlayer mediaPlayer;
+    private AudioManager audioManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.word_list);
 
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         final ArrayList<Word> words = new ArrayList<Word>();
 
         words.add(new Word("one", "lutti", R.drawable.number_one, R.raw.number_one));
@@ -66,13 +70,29 @@ public class NumbersActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 releaseMediaPlayer();
                 Word word = words.get(position);
-                mediaPlayer = MediaPlayer.create(NumbersActivity.this, word.getAudioID());
-                mediaPlayer.start();
-                mediaPlayer.setOnCompletionListener(onCompletionListener);
+                int result = audioManager.requestAudioFocus(onAudioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+                if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
+                    mediaPlayer = MediaPlayer.create(NumbersActivity.this, word.getAudioID());
+                    mediaPlayer.start();
+                    mediaPlayer.setOnCompletionListener(onCompletionListener);
+                }
             }
         });
 
     }
+
+    private AudioManager.OnAudioFocusChangeListener onAudioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener(){
+        public void onAudioFocusChange(int focusChange){
+            if(focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT || focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK){
+                mediaPlayer.pause();
+                mediaPlayer.seekTo(0);
+            } else if(focusChange == AudioManager.AUDIOFOCUS_GAIN){
+                mediaPlayer.start();
+            } else if(focusChange == AudioManager.AUDIOFOCUS_LOSS){
+                releaseMediaPlayer();
+            }
+        }
+    };
 
     private MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener(){
         @Override
@@ -102,6 +122,7 @@ public class NumbersActivity extends AppCompatActivity {
             // setting the media player to null is an easy way to tell that the media player
             // is not configured to play an audio file at the moment.
             mediaPlayer = null;
+            audioManager.abandonAudioFocus(onAudioFocusChangeListener);
         }
     }
 }

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="@dimen/list_item_height"
     xmlns:style="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
     >
 
     <ImageView
@@ -14,7 +13,8 @@
 
     <LinearLayout
         style="@style/TextAreaStyle"
-        android:id="@+id/textArea">
+        android:id="@+id/textArea"
+        android:layout_toRightOf="@id/textImage">
         <TextView
             android:id="@+id/miwok_text_view"
             style="@style/MiwokWordStyle"
@@ -25,5 +25,13 @@
             tools:text="one"/>
     </LinearLayout>
 
+    <ImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="16dp"
+        android:src="@drawable/ic_play_arrow_white_24dp"/>
 
-</LinearLayout>
+
+</RelativeLayout>
